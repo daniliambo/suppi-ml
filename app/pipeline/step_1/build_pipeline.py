@@ -32,7 +32,7 @@ from collections import defaultdict
 import pprint
 
 
-def compose_pipeline(dh):
+def compose_pipeline():
 
     def compose_encode_decode_dict(columns_feature):
         d_encode = dict(zip(columns_feature, np.arange(
@@ -114,24 +114,34 @@ def compose_pipeline(dh):
         ('knn', combine_knn_imputation_feature),
     ], verbose=True)
 
-    def fill_dataholder():
-        dh.d_encode = d_encode
-        dh.d_decode = d_decode
-        dh.h_encode = h_encode
-        dh.h_decode = h_decode
-        dh.columns_base = columns_base
-        dh.columns_main = columns_main
-        dh.conversions = conversions
-        dh.preprocessor_before_join_feature = preprocessor_before_join_feature
-        dh.ordinal_encode_base_columns_feature = ordinal_encode_base_columns_feature
-    fill_dataholder()
+    class DataHolder:
+        def __init__(self, d_encode=None, d_decode=None, h_encode=None, h_decode=None, columns_base=None, columns_main=None, conversions=None, preprocessor_before_join_feature=None, ordinal_encode_base_columns_feature=None) -> None:
+            self.d_encode = d_encode
+            self.d_decode = d_decode
+            self.h_encode = h_encode
+            self.h_decode = h_decode
+            self.columns_base = columns_base
+            self.columns_main = columns_main
+            self.conversions = conversions
+            self.preprocessor_before_join_feature = preprocessor_before_join_feature
+            self.ordinal_encode_base_columns_feature = ordinal_encode_base_columns_feature
+
+    dh = DataHolder()
+    dh.d_encode = d_encode
+    dh.d_decode = d_decode
+    dh.h_encode = h_encode
+    dh.h_decode = h_decode
+    dh.columns_base = columns_base
+    dh.columns_main = columns_main
+    dh.conversions = conversions
+    dh.preprocessor_before_join_feature = preprocessor_before_join_feature
+    dh.ordinal_encode_base_columns_feature = ordinal_encode_base_columns_feature
+
+    return dh
 
 
-def run_pipeline(dh, df, inference):
-    if not inference:
-        X = dh.preprocessor_before_join_feature.fit_transform(df)
-    else:
-        X = dh.preprocessor_before_join_feature.transform(df)
+def run_pipeline(dh, df):
+    X = dh.preprocessor_before_join_feature.fit_transform(df)
     res = pd.DataFrame(X)
 
     # rewrite
@@ -143,24 +153,9 @@ def run_pipeline(dh, df, inference):
     return res
 
 
-class DataHolder:
-    def __init__(self, d_encode=None, d_decode=None, h_encode=None, h_decode=None, columns_base=None, columns_main=None, conversions=None, preprocessor_before_join_feature=None, ordinal_encode_base_columns_feature=None) -> None:
-        self.d_encode = d_encode
-        self.d_decode = d_decode
-        self.h_encode = h_encode
-        self.h_decode = h_decode
-        self.columns_base = columns_base
-        self.columns_main = columns_main
-        self.conversions = conversions
-        self.preprocessor_before_join_feature = preprocessor_before_join_feature
-        self.ordinal_encode_base_columns_feature = ordinal_encode_base_columns_feature
-
-
-dh = DataHolder()
-
-
-def load_and_preprocess(df: pd.DataFrame, inference):
-    if not inference:
-        compose_pipeline(dh)
-    df = run_pipeline(dh, df, inference)
+def load_and_preprocess():
+    dh = compose_pipeline()
+    reader = ReadData()
+    df = reader.read('feature')
+    df = run_pipeline(dh, df)
     return df

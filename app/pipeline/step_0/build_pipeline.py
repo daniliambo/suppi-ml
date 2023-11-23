@@ -115,15 +115,18 @@ def compose_pipeline():
     return preprocessor_before_join_data
 
 
-def run_pipeline(preprocessor_before_join_data, df, inference):
-    if not inference:
-        X = preprocessor_before_join_data.fit_transform(df)
-    else:
-        X = preprocessor_before_join_data.transform(df)
+def run_pipeline(preprocessor_before_join_data, df):
+    X = preprocessor_before_join_data.fit_transform(df)
     return X
 
 
-def load_and_preprocess(df: pd.DataFrame, inference):
+def load_and_preprocess():
+    reader = ReadData()
+    df_data = reader.read('data')
     preprocessor_before_join_data = compose_pipeline()
-    df = run_pipeline(preprocessor_before_join_data, df, inference)
+    df = run_pipeline(preprocessor_before_join_data, df_data)
     return df
+
+
+if __name__ == "__main__":
+    load_and_preprocess()

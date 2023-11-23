@@ -33,8 +33,6 @@ pprint.PrettyPrinter(indent=4)
 
 
 class ColumnTransformerSetDate(BaseEstimator, TransformerMixin):
-    """
-    """
 
     def __init__(self, d_encode, d_decode, h_encode, h_decode):
         self.columns = 'date'
