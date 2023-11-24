@@ -5,6 +5,7 @@ from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score, m
 import matplotlib.pyplot as plt
 from itertools import chain, combinations
 from scipy.special import softmax
+from typing import List
 
 from tqdm import tqdm
 from warnings import filterwarnings
@@ -213,44 +214,33 @@ class Model(ModelBuilder):
     def __init__(self):
         super().__init__()
         self.number_of_days_to_predict = 7
-        self.number_of_days_for_sliding_window = 7
+        self.number_of_days_for_sliding_window = 5
+        self.datasets: List = []
+        self.models: List = []
 
     def pipeline(self, inference=False, df_=pd.DataFrame):
-        df = df_.copy()
+        df_train = df_.copy()
         # load the data
 
         # split the data
-        df = self.preprocess_df(df)
-        df_train, df_test = self.split_df(df)
+        df_train = self.preprocess_df(df_train)
 
-        # creates self.weekly_mean on df_train; MUST BE DONE
-        self.extract_weekly_mean(df_train)
-
-        # en-reach_1 the data with weekly_mean and week
-        df_train = self.enreach_data_1(df_train)
-        df_test = self.enreach_data_1(df_test)
-
-        # en-reach_2 the data with the rolling mean for all cols except of TARGET;
-
-        # finish
-        # df_train = self.enreach_data_2(df_train)
-        # df_test = self.enreach_data_2(df_test)
-
-        # if not inference, recreate df_train / df_test datasets
-        ModelBuilder.__init__(self, window=self.number_of_days_for_sliding_window,
-                              model_count=self.number_of_days_to_predict)
         if not inference:
-            _ = pd.DataFrame.copy(df_train)
-            df_train = pd.DataFrame.copy(_[:-self.model_count])
-            df_test = pd.DataFrame.copy(_[-self.model_count:])
+            ModelBuilder.__init__(self, window=self.number_of_days_for_sliding_window,
+                                  model_count=self.number_of_days_to_predict)
+            # creates self.weekly_mean on df_train; MUST BE DONE
+            self.extract_weekly_mean(df_train)
+            df_train, df_test = self.split_df(df_train)
+            df_test = self.enreach_data_1(df_test)
 
-        # create datasets, train models, get predictions
-        datasets = self.build_datasets(df_train, df_test)
-        models = self.train_models(datasets)
-        preds = self.predict(df_train, models)
+        df_train = self.enreach_data_1(df_train)
 
-        # extract feature importance:
-        # self.feature_importance(models[0])
+        if not inference:
+            # create datasets, train models, get predictions
+            self.datasets = self.build_datasets(df_train, df_test)
+            self.models = self.train_models(self.datasets)
+
+        preds = self.predict(df_train, self.models)
 
         # display if on inference and save predictions
         if inference:

@@ -111,7 +111,7 @@ def compose_pipeline():
 
     preprocessor_before_join_feature = Pipeline(steps=[
         ('keep_feature', keep_feature),
-        ('knn', combine_knn_imputation_feature),
+        # ('knn', combine_knn_imputation_feature),
     ], verbose=True)
 
     class DataHolder:
@@ -125,6 +125,7 @@ def compose_pipeline():
             self.conversions = conversions
             self.preprocessor_before_join_feature = preprocessor_before_join_feature
             self.ordinal_encode_base_columns_feature = ordinal_encode_base_columns_feature
+            self.standardize_numeric_columns_feature = standardize_numeric_columns_feature
 
     dh = DataHolder()
     dh.d_encode = d_encode
@@ -149,13 +150,48 @@ def run_pipeline(dh, df):
         0][1].inverse_transform(res.loc[:, dh.h_encode(dh.columns_base)])
     res.loc[:, dh.h_encode(dh.columns_base)] = inv_cols
 
+    # col = dh.d_encode['marketing_seller_price']
+    # print(dh.d_encode)
+
+    # print(dh.standardize_numeric_columns_feature['standardize_feature'].transformers_[
+    #       0][1].mean_)
+    # print(dh.standardize_numeric_columns_feature['standardize_feature'].transformers_[
+    #       0][1].var_)
     res.rename(columns=dh.d_decode, inplace=True)
     return res
 
 
 def load_and_preprocess():
+    
     dh = compose_pipeline()
     reader = ReadData()
     df = reader.read('feature')
-    df = run_pipeline(dh, df)
+    # print(df['marketing_seller_price'].mean())
+    # print(df['marketing_seller_price'].std())
+    # df = df.iloc[:100, :]
+    # print(np.unique(df['marketing_seller_price']))
+    # df = run_pipeline(dh, df)
+
+    columns_base = ["date", "offer_id", "shop_id"]
+
+    columns_main = ['num_actions',
+                    'position_category',
+                    'price_index',
+                    'external_index_data_minimal_price',
+                    'external_index_data_price_index_value',
+                    'self_marketplaces_index_data_minimal_price',
+                    'self_marketplaces_index_data_price_index_value',
+                    'marketing_seller_price',
+                    'marketing_price']
+
+    conversions = ['conv_tocart',
+                   'conv_tocart_pdp',
+                   'hits_tocart',
+                   'hits_tocart_pdp',
+                   'hits_view_search']
+
+    columns_feature = columns_base + columns_main + conversions
+    cols_to_drop = list(set(df.columns) - set(columns_feature))
+    df.drop(cols_to_drop, axis=1, inplace=True)
+
     return df
