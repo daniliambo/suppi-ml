@@ -83,20 +83,20 @@ def plot_distributions(df):
     plot_sales_line(col_to_group_by, TARGET, df)
 
 
-def train_test_split(df):
+# def train_test_split(df):
 
-    def get_split(df: pd.DataFrame):
-        offset = df.index[-1] - DateOffset(weeks=1)
-        df_train = df[df.index < offset]
-        df_test = df[df.index >= offset]
-        df_train.reset_index(inplace=True)
-        df_test.reset_index(inplace=True)
-        return df_train, df_test
+#     def get_split(df: pd.DataFrame):
+#         offset = df.index[-1] - DateOffset(weeks=1)
+#         df_train = df[df.index < offset]
+#         df_test = df[df.index >= offset]
+#         df_train.reset_index(inplace=True)
+#         df_test.reset_index(inplace=True)
+#         return df_train, df_test
 
-    df = set_datetime(df)
-    df_train, df_test = get_split(df)
+#     df = set_datetime(df)
+#     df_train, df_test = get_split(df)
 
-    return df_train, df_test
+#     return df_train, df_test
 
 
 def set_target(df):

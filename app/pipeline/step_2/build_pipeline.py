@@ -112,7 +112,6 @@ def load_and_preprocess():
     n = 10
 
     df, bundles = run_pipeline(n)
-    # plot(df)
     return bundles
 
 

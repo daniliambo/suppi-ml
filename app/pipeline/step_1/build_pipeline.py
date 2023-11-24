@@ -150,30 +150,16 @@ def run_pipeline(dh, df):
         0][1].inverse_transform(res.loc[:, dh.h_encode(dh.columns_base)])
     res.loc[:, dh.h_encode(dh.columns_base)] = inv_cols
 
-    # col = dh.d_encode['marketing_seller_price']
-    # print(dh.d_encode)
-
-    # print(dh.standardize_numeric_columns_feature['standardize_feature'].transformers_[
-    #       0][1].mean_)
-    # print(dh.standardize_numeric_columns_feature['standardize_feature'].transformers_[
-    #       0][1].var_)
     res.rename(columns=dh.d_decode, inplace=True)
     return res
 
 
 def load_and_preprocess():
-    
+
     dh = compose_pipeline()
     reader = ReadData()
     df = reader.read('feature')
-    # print(df['marketing_seller_price'].mean())
-    # print(df['marketing_seller_price'].std())
-    # df = df.iloc[:100, :]
-    # print(np.unique(df['marketing_seller_price']))
-    # df = run_pipeline(dh, df)
-
     columns_base = ["date", "offer_id", "shop_id"]
-
     columns_main = ['num_actions',
                     'position_category',
                     'price_index',
@@ -183,7 +169,6 @@ def load_and_preprocess():
                     'self_marketplaces_index_data_price_index_value',
                     'marketing_seller_price',
                     'marketing_price']
-
     conversions = ['conv_tocart',
                    'conv_tocart_pdp',
                    'hits_tocart',
