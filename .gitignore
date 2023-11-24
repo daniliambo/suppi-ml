@@ -1,3 +1,4 @@
 tests/
 exploration/
 .DS_Store
+.idea/
